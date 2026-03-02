@@ -1,19 +1,20 @@
-const adminAuth = (req, res, next) => {
-  const token = "xyz";
-  const isAdminAuthorized = token === "xyz";
-  if (!isAdminAuthorized) {
-    res.status(401).send("UnAuthorized Token");
+const jwt = require("jsonwebtoken");
+const User = require("../model/user");
+
+const userAuth = async (req, res, next) => {
+  //Read the token from the req cookies
+  try {
+    const { token } = req.cookies;
+    const decoderObj = await jwt.verify(token, "Authr#Izat_ion!01345");
+    const user = await User.findById(decoderObj._id);
+    if (!user) {
+      throw new error("User is not found");
+    }
+    req.user = user;
+    next();
+  } catch (err) {
+    res.status(400).send("Error - " + err.message);
   }
-  next();
 };
 
-const userAuth = (req, res, next) => {
-  const token = "xyz";
-  const isUserAuthorized = token === "xyz";
-  if (!isUserAuthorized) {
-    res.status(401).send("UnAuthorized Token");
-  }
-  next();
-};
-
-module.exports = { adminAuth, userAuth };
+module.exports = { userAuth };
